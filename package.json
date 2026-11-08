@@ -1,0 +1,26 @@
+{
+  "name": "identityprovider-tooling",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local commit validation and future release tooling for IdentityProvider",
+  "engines": {
+    "node": "^22.14.0 || >=24.10.0"
+  },
+  "scripts": {
+    "commitlint": "commitlint --strict",
+    "test:release": "node scripts/tests/test-semantic-release.mjs",
+    "release:preview": "node scripts/release/run.mjs preview",
+    "test:pipeline": "node --test scripts/tests/pipeline.test.mjs",
+    "test:nexus": "node --test scripts/tests/nexus.test.mjs"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
+    "@semantic-release/changelog": "7.0.0",
+    "@semantic-release/commit-analyzer": "13.0.1",
+    "@semantic-release/exec": "7.1.0",
+    "@semantic-release/github": "12.0.10",
+    "@semantic-release/release-notes-generator": "14.1.1",
+    "semantic-release": "25.0.9"
+  }
+}

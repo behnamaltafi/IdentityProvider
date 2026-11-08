@@ -1,0 +1,58 @@
+# Fresh platform only. Never load this security realm over the existing controller.
+jenkins:
+  systemMessage: "Portable CI/CD platform; configuration managed in source control"
+  numExecutors: 0
+  mode: EXCLUSIVE
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          password: "${admin-password}"
+  authorizationStrategy:
+    globalMatrix:
+      entries:
+        - user:
+            name: admin
+            permissions: ["Overall/Administer"]
+  remotingSecurity:
+    enabled: true
+  globalNodeProperties:
+    - envVars:
+        env:
+          - {key: CICD_RELEASE_APPROVERS, value: "${CICD_RELEASE_APPROVERS}"}
+          - {key: CICD_PRODUCTION_APPROVERS, value: "${CICD_PRODUCTION_APPROVERS}"}
+  nodes:
+    - permanent:
+        name: release-agent
+        remoteFS: /home/jenkins/agent
+        numExecutors: 1
+        mode: EXCLUSIVE
+        labelString: "linux docker dotnet10 release"
+        launcher: {inbound: {webSocket: true}}
+    - permanent:
+        name: ci-agent
+        remoteFS: /home/jenkins/agent
+        numExecutors: 1
+        mode: EXCLUSIVE
+        labelString: "linux dotnet10 ci"
+        launcher: {inbound: {webSocket: true}}
+unclassified:
+  location:
+    url: "${JENKINS_PUBLIC_URL}"
+  globalLibraries:
+    libraries:
+      - name: cicd-platform
+        defaultVersion: "${LIBRARY_REVISION}"
+        implicit: false
+        allowVersionOverride: false
+        includeInChangesets: false
+        retriever:
+          modernSCM:
+            libraryPath: "${LIBRARY_PATH}"
+            scm:
+              git:
+                remote: "${LIBRARY_REPOSITORY}"
+                credentialsId: "${LIBRARY_CREDENTIALS_ID}"
+jobs:
+  - file: /opt/platform/casc/jobs.groovy

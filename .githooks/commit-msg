@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+if [ ! -f node_modules/@commitlint/cli/cli.js ]; then
+    echo 'Commit tooling is missing. Run npm ci, then scripts/Install-GitHooks.ps1.' >&2
+    exit 1
+fi
+node node_modules/@commitlint/cli/cli.js --strict --edit "$1"

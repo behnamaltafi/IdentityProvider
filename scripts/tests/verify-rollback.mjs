@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { artifactRoot, must, published, run } from '../release/lib.mjs';
+import { latest } from '../deploy/deploy.mjs';
+const [environment, version]=process.argv.slice(2);
+must(['internal','uat','production'].includes(environment),'Select an actual environment');
+const m=published(version),record=latest(environment);
+must(record?.operation==='rollback'&&record.version===version&&record.imageDigest===m.imageDigest,'Latest healthy record is not the selected rollback');
+must(Date.parse(m.createdAtUtc)<Date.parse(record.startedAtUtc),'Rollback target must predate this operation');
+const state=JSON.parse(run('docker',['inspect',record.containerId]))[0];
+must(state.Config.Image===`${m.imageRepository}@${m.imageDigest}`&&state.State.Health.Status==='healthy','Rollback container digest/health mismatch');
+if(environment==='production')must(record.approvalId&&record.approvedBy,'Missing actual Production rollback approval');
+must(fs.existsSync(path.join(artifactRoot(),'releases',version,'SHA256SUMS')),'Original immutable payload inventory missing');
+console.log(`PASS retained ${version} is healthy in ${environment}; original release checksums/digest are intact; inspect the Jenkins rollback console to confirm no build/publish command ran.`);

@@ -1,0 +1,13 @@
+configuration-as-code
+github-branch-source
+git
+workflow-aggregator
+pipeline-model-definition
+pipeline-utility-steps
+credentials-binding
+matrix-auth
+job-dsl
+coverage
+lockable-resources
+timestamper
+basic-branch-build-strategies

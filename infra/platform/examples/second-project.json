@@ -1,0 +1,29 @@
+{
+  "id": "inventory",
+  "application": "Inventory.Api",
+  "zipPrefix": "Inventory",
+  "repositoryUrl": "https://github.com/YOUR-OWNER/Inventory.git",
+  "solution": "Inventory.slnx",
+  "publishProject": "src/Inventory.Api/Inventory.Api.csproj",
+  "publishAssembly": "Inventory.Api.dll",
+  "testSettings": "tests/coverlet.runsettings",
+  "priorityTestProject": "tests/Inventory.UnitTests/Inventory.UnitTests.csproj",
+  "prioritySettings": "tests/coverlet.priority.runsettings",
+  "priorityCoverageThreshold": 0.8,
+  "artifactRoot": "/release-artifacts/inventory",
+  "environmentRoot": "/lab/environments/inventory",
+  "imageRepository": "registry.example.com:443/inventory/api",
+  "registryApiUrl": "https://registry.example.com",
+  "composeProjectPrefix": "inventory",
+  "environments": ["internal", "uat", "production"],
+  "releaseCredentialsId": "inventory-github-release",
+  "commands": {
+    "ci": "pwsh -NoProfile -File scripts/ci/Invoke-CI.ps1",
+    "preview": "node scripts/release/run.mjs preview",
+    "publish": "node scripts/release/run.mjs publish",
+    "versions": "node scripts/deploy/cli.mjs versions",
+    "approve": "node scripts/deploy/cli.mjs approve production \"$RELEASE_VERSION\"",
+    "deploy": "node scripts/deploy/cli.mjs deploy \"$TARGET_ENV\" \"$RELEASE_VERSION\" \"$APPROVAL_ID\"",
+    "rollback": "node scripts/deploy/cli.mjs rollback \"$TARGET_ENV\" \"$RELEASE_VERSION\" \"$APPROVAL_ID\""
+  }
+}

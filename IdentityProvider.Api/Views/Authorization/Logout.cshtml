@@ -1,0 +1,7 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{ Layout = null; }
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>خروج از حساب</title></head>
+<body><main><h1>از حساب خارج می‌شوید؟</h1><form method="post" action="@Context.Request.PathBase/connect/logout">
+@Html.AntiForgeryToken()
+@foreach (var pair in Context.Request.Query) { foreach (var value in pair.Value) { <input type="hidden" name="@pair.Key" value="@value"> } }
+<button type="submit">خروج از حساب</button></form></main></body></html>

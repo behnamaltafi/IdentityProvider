@@ -1,0 +1,10 @@
+[
+  {
+    "project": "identityprovider",
+    "repository": "identityprovider-releases",
+    "publisherUser": "cicd-identityprovider-publish",
+    "readerUser": "cicd-identityprovider-read",
+    "publisherCredentialId": "identityprovider-nexus-publish",
+    "readerCredentialId": "identityprovider-nexus-read"
+  }
+]

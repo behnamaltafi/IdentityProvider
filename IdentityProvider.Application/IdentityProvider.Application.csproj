@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
+    <PropertyGroup>
+        <RootNamespace>$([System.Text.RegularExpressions.Regex]::Replace($(MSBuildProjectName), "^[0-9]+\.?", ""))</RootNamespace>
+    </PropertyGroup>
+	<ItemGroup>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\IdentityProvider.Domain\IdentityProvider.Domain.csproj" />
+	</ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="MessageBusConsumer\" />
+    </ItemGroup>
+
+</Project>

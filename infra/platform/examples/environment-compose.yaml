@@ -1,0 +1,40 @@
+# Copy for each project/environment. Edit ports, network and actual health paths
+# in this file; those bytes are covered by the deployment configuration hash.
+services:
+  api:
+    image: ${APP_IMAGE:?A verified manifest image digest is required}
+    env_file: [.env.runtime]
+    restart: unless-stopped
+    ports: ["127.0.0.1:8091:8080"]
+    networks: [runtime]
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -ec
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/8080;
+          printf 'GET /health/live HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3;
+          read -r status <&3;
+          [[ "$$status" == *" 200 "* ]]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+  smoke:
+    image: registry:3@sha256:38907510915c3f1604c7e83d6ab602ab3020d092f73bdaed8696773693ff768c
+    profiles: [verify]
+    entrypoint: [/bin/sh, -ec]
+    command: ["wget -q -O - http://api:8080/health/live | grep -q Healthy"]
+    networks: [runtime]
+    mem_limit: 64m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+networks:
+  runtime:
+    name: inventory-internal-runtime

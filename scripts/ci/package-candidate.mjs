@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { branchName, git, registryManifest, run, sha, writeJson } from '../release/lib.mjs';
+const commit = git('rev-parse', 'HEAD');
+const version = `0.0.0-ci.${commit.slice(0,12)}`;
+run('dotnet', ['publish', 'IdentityProvider.Api/IdentityProvider.Api.csproj', '-c', 'Release', '--no-build', '--no-restore', '-o', path.resolve('artifacts/candidate/publish'), `-p:Version=${version}`], { echo: true });
+const zip = path.resolve(`artifacts/candidate/IdentityProvider-${version}.zip`);
+run('zip', ['-q','-r','-X',zip,'.'], {cwd:path.resolve('artifacts/candidate/publish')});
+run('unzip',['-tq',zip]);
+const repository=process.env.CANDIDATE_IMAGE_REPOSITORY;
+if (!repository) throw new Error('Explicit CANDIDATE_IMAGE_REPOSITORY is required for this optional trusted candidate job');
+const branch=branchName();
+const label=branch.replace(/[^a-zA-Z0-9_.-]/g,'-').slice(0,60).toLowerCase();
+const image=`${repository}:${label}-${version}-${process.env.BUILD_NUMBER ?? 'local'}`;
+run('docker',['build','-f',path.resolve('Dockerfile.release'),'-t',image,'artifacts/candidate'],{echo:true});
+run('docker',['push',image],{echo:true});
+const imageDigest=await registryManifest(repository,image.split(':').at(-1));
+run('docker',['pull',`${repository}@${imageDigest}`],{echo:true});
+writeJson('artifacts/candidate/metadata.json', { kind: 'disposable-ci-candidate', branch, version, sourceCommit: commit, official: false,
+  zipFile:path.basename(zip),zipSha256:sha(fs.readFileSync(zip)),imageRepository:repository,imageDigest });

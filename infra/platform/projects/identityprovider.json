@@ -1,0 +1,14 @@
+{
+  "id": "identityprovider",
+  "owner": "behnamaltafi",
+  "repository": "IdentityProvider",
+  "url": "https://github.com/behnamaltafi/IdentityProvider.git",
+  "scanCredentialsId": "identityprovider-github-read",
+  "checkoutCredentialsId": "identityprovider-github-read",
+  "indexInterval": "5m",
+  "deploymentEnabled": false,
+  "bootstrapHeads": [
+    "master", "develop", "feature/cicd-pipeline", "feature/github-portable-platform",
+    "release/cicd-lab", "release/github-portable-platform", "hotfix/release-resource-cleanup"
+  ]
+}

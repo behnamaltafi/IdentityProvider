@@ -1,0 +1,2 @@
+@Library('cicd-platform') _
+dotnetPipeline(mode: 'rollback', configuration: 'cicd/project.json')

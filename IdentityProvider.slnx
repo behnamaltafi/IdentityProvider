@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/1.Core/">
+    <Project Path="IdentityProvider.Domain/IdentityProvider.Domain.csproj" />
+    <Project Path="IdentityProvider.Application/IdentityProvider.Application.csproj" />
+  </Folder>
+  <Folder Name="/2.Infrastructure/">
+    <Project Path="IdentityProvider.Infrastructure/IdentityProvider.Infrastructure.csproj" />
+    <Project Path="IdentityProvider.Infrastructure.Identity/IdentityProvider.Infrastructure.Identity.csproj" />
+  </Folder>
+  <Folder Name="/3.EndPoint/">
+    <Project Path="IdentityProvider.Api/IdentityProvider.Api.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/IdentityProvider.Application.UnitTests/IdentityProvider.Application.UnitTests.csproj" />
+    <Project Path="Tests/IdentityProvider.Infrastructure.IntegrationTests/IdentityProvider.Infrastructure.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

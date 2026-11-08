@@ -1,0 +1,5 @@
+[**/Migrations/**]
+dotnet_analyzer_diagnostic.severity = suggestion
+[ValidateBase64.cs]
+[ConditionUtility.cs]
+dotnet_analyzer_diagnostic.severity = suggestion

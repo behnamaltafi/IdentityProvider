@@ -1,0 +1,38 @@
+# Add a socket-free CI node to an existing controller without replacing its home.
+name: ${CI_PROJECT_NAME:-cicd-github-ci}
+services:
+  ci-agent:
+    image: ${CI_AGENT_IMAGE:-cicd-platform/agent:local}
+    restart: unless-stopped
+    init: true
+    environment:
+      JENKINS_AGENT_NAME: ${CI_AGENT_NAME:-github-ci-agent}
+      JENKINS_CONTROLLER_URL: ${JENKINS_CONTROLLER_URL:-http://jenkins-controller:8080/}
+      NUGET_LOCAL_SOURCE: /bootstrap/nuget
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+      CI: "true"
+    volumes:
+      - ci-work:/home/jenkins/agent
+      - type: bind
+        source: ${NUGET_BOOTSTRAP_PATH:-./artifacts/bootstrap/nuget}
+        target: /bootstrap/nuget
+        read_only: true
+        bind: {create_host_path: false}
+    secrets:
+      - source: ci-agent-secret
+        target: agent-secret
+    networks: [ci]
+    mem_limit: ${CI_MEMORY_LIMIT:-2304m}
+    mem_reservation: 512m
+    cpus: 2
+    pids_limit: 1024
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
+networks:
+  ci: {name: "${CI_NETWORK_NAME:-cicd-github-ci}"}
+volumes:
+  ci-work: {name: "${CI_WORK_VOLUME:-cicd-github-ci-work}"}
+secrets:
+  ci-agent-secret: {file: "${CI_AGENT_SECRET_FILE:-./secrets/github-ci-agent-secret}"}

@@ -1,0 +1,8 @@
+# Use with the main platform Compose after starting Nexus. No project name/volume override.
+services:
+  release-agent:
+    networks: [trusted, artifacts]
+networks:
+  artifacts:
+    name: ${NEXUS_NETWORK_NAME:-cicd-artifacts}
+    external: true

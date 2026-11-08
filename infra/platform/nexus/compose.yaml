@@ -1,0 +1,30 @@
+name: ${NEXUS_PLATFORM_ID:-cicd-nexus}
+services:
+  nexus:
+    image: sonatype/nexus3:3.98.1@sha256:91a9af44af777c353db11a5ee73850c7eb24b03c997ff4cc62a3500ad38a1332
+    restart: unless-stopped
+    init: true
+    ports: ["${NEXUS_BIND_ADDRESS:-127.0.0.1}:${NEXUS_HTTP_PORT:-8181}:8081"]
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: >-
+        -Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m
+        -Djava.util.prefs.userRoot=/nexus-data/javaprefs
+    volumes: [nexus-data:/nexus-data]
+    networks: [artifacts]
+    mem_limit: 6g
+    mem_reservation: 3g
+    cpus: 2
+    pids_limit: 2048
+    stop_grace_period: 120s
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD-SHELL, "curl -fsS --max-time 10 http://127.0.0.1:8081/service/rest/v1/status >/dev/null"]
+      interval: 20s
+      timeout: 12s
+      start_period: 240s
+      retries: 15
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
+networks:
+  artifacts: {name: "${NEXUS_NETWORK_NAME:-cicd-artifacts}"}
+volumes:
+  nexus-data: {}

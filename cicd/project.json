@@ -1,0 +1,36 @@
+{
+  "id": "identityprovider",
+  "application": "IdentityProvider.Api",
+  "zipPrefix": "IdentityProvider",
+  "repositoryUrl": "https://github.com/behnamaltafi/IdentityProvider.git",
+  "solution": "IdentityProvider.slnx",
+  "testSettings": "Tests/coverlet.runsettings",
+  "priorityTestProject": "Tests/IdentityProvider.Application.UnitTests/IdentityProvider.Application.UnitTests.csproj",
+  "prioritySettings": "Tests/coverlet.priority.runsettings",
+  "priorityCoverageThreshold": 0.8,
+  "publishProject": "IdentityProvider.Api/IdentityProvider.Api.csproj",
+  "publishAssembly": "IdentityProvider.Api.dll",
+  "artifactRoot": "/release-artifacts/identityprovider",
+  "artifactStore": {
+    "backend": "nexus",
+    "baseUrl": "http://nexus:8081",
+    "repository": "identityprovider-releases",
+    "publisherCredentialsId": "identityprovider-nexus-publish",
+    "readerCredentialsId": "identityprovider-nexus-read"
+  },
+  "environmentRoot": "/lab/environments/identityprovider",
+  "imageRepository": "localhost:5501/identityprovider/api",
+  "registryApiUrl": "http://registry:5000",
+  "composeProjectPrefix": "identityprovider",
+  "environments": ["internal", "uat", "production"],
+  "releaseCredentialsId": "identityprovider-github-release",
+  "commands": {
+    "ci": "pwsh -NoProfile -File scripts/ci/Invoke-CI.ps1",
+    "preview": "node scripts/release/run.mjs preview",
+    "publish": "node scripts/release/run.mjs publish",
+    "versions": "node scripts/deploy/cli.mjs versions",
+    "approve": "node scripts/deploy/cli.mjs approve production \"$RELEASE_VERSION\"",
+    "deploy": "node scripts/deploy/cli.mjs deploy \"$TARGET_ENV\" \"$RELEASE_VERSION\" \"$APPROVAL_ID\"",
+    "rollback": "node scripts/deploy/cli.mjs rollback \"$TARGET_ENV\" \"$RELEASE_VERSION\" \"$APPROVAL_ID\""
+  }
+}

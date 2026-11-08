@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<NoWarn>1701;1702,1591,1572,1571,1573,1587,1570</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<NoWarn>1701;1702,1591,1572,1571,1573,1587,1570</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup>
+		<RootNamespace>$([System.Text.RegularExpressions.Regex]::Replace($(MSBuildProjectName), "^[0-9]+\.?", ""))</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+	</ItemGroup>
+
+</Project>

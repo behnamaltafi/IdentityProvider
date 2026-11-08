@@ -1,0 +1,103 @@
+name: ${PLATFORM_ID:-cicd-platform}
+x-agent: &agent
+  image: ${PLATFORM_ID:-cicd-platform}/agent:local
+  build: {context: ./agent}
+  restart: unless-stopped
+  init: true
+  depends_on: {controller: {condition: service_healthy}}
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 1024
+  mem_limit: 2304m
+  cpus: 2
+  logging: {driver: local, options: {max-size: 10m, max-file: "3"}}
+services:
+  controller:
+    image: ${PLATFORM_ID:-cicd-platform}/controller:local
+    build: {context: ./controller}
+    restart: unless-stopped
+    init: true
+    ports: ["${JENKINS_BIND_ADDRESS:-127.0.0.1}:${JENKINS_PORT:-8180}:8080"]
+    environment:
+      JAVA_OPTS: -Xms256m -Xmx1536m -Djenkins.install.runSetupWizard=false
+      JENKINS_PUBLIC_URL: ${JENKINS_PUBLIC_URL:-http://localhost:8180/}
+      LIBRARY_REPOSITORY: ${LIBRARY_REPOSITORY:?Configure library GitHub URL}
+      LIBRARY_REVISION: ${LIBRARY_REVISION:?Pin a reviewed library commit}
+      LIBRARY_PATH: ${LIBRARY_PATH:-infra/platform/library}
+      LIBRARY_CREDENTIALS_ID: ${LIBRARY_CREDENTIALS_ID:-platform-github-read}
+      CICD_RELEASE_APPROVERS: ${CICD_RELEASE_APPROVERS:?Set release approvers}
+      CICD_PRODUCTION_APPROVERS: ${CICD_PRODUCTION_APPROVERS:?Set Production approvers}
+      SECRETS: /run/secrets
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - ./casc:/opt/platform/casc:ro
+      - ./projects:/opt/platform/projects:ro
+    secrets: [admin-password]
+    networks: [ci, trusted]
+    mem_limit: 2g
+    cpus: 2
+    pids_limit: 512
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD-SHELL, "curl -fsS --max-time 10 http://127.0.0.1:8080/login >/dev/null"]
+      interval: 15s
+      timeout: 12s
+      start_period: 180s
+      retries: 12
+    logging: {driver: local, options: {max-size: 10m, max-file: "3"}}
+  registry:
+    image: registry:3@sha256:38907510915c3f1604c7e83d6ab602ab3020d092f73bdaed8696773693ff768c
+    restart: unless-stopped
+    ports: ["${REGISTRY_BIND_ADDRESS:-127.0.0.1}:${REGISTRY_PORT:-5501}:5000"]
+    environment: {REGISTRY_HTTP_ADDR: "0.0.0.0:5000", OTEL_TRACES_EXPORTER: none}
+    volumes: [registry-data:/var/lib/registry]
+    networks: [trusted]
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 128
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -O - http://127.0.0.1:5000/v2/ >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+    security_opt: [no-new-privileges:true]
+  release-agent:
+    <<: *agent
+    profiles: [release]
+    environment:
+      JENKINS_AGENT_NAME: release-agent
+      REGISTRY_ADDRESS: ${REGISTRY_ADDRESS:-localhost:5501}
+      DOCKER_HOST: unix:///var/run/docker.sock
+    group_add: ["${DOCKER_SOCKET_GID:-0}"]
+    volumes:
+      - release-work:/home/jenkins/agent
+      - artifacts:/release-artifacts
+      - ./environments:/lab/environments:ro
+      - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock
+    secrets:
+      - source: release-agent-secret
+        target: agent-secret
+    networks: [trusted]
+  ci-agent:
+    <<: *agent
+    profiles: [ci]
+    environment: {JENKINS_AGENT_NAME: ci-agent}
+    volumes: [ci-work:/home/jenkins/agent]
+    secrets:
+      - source: ci-agent-secret
+        target: agent-secret
+    networks: [ci]
+networks:
+  ci: {}
+  trusted: {}
+volumes:
+  jenkins-home: {}
+  registry-data: {}
+  artifacts: {}
+  release-work: {}
+  ci-work: {}
+secrets:
+  admin-password: {file: "${ADMIN_PASSWORD_FILE:-./secrets/admin-password}"}
+  release-agent-secret: {file: "${RELEASE_AGENT_SECRET_FILE:-./secrets/release-agent-secret}"}
+  ci-agent-secret: {file: "${CI_AGENT_SECRET_FILE:-./secrets/ci-agent-secret}"}

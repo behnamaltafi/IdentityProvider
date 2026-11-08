@@ -1,0 +1,12 @@
+<Project>
+	<!-- MSBuild does not pick up files starting with "_" automatically; import it explicitly. -->
+	<Import Project="$([MSBuild]::GetPathOfFileAbove('_Directory.Build.props', '$(MSBuildThisFileDirectory)'))" />
+
+	<!--
+	  Production projects target net10.0 on this branch. Tests must match
+	  (see Tests\Directory.Build.props for the full explanation).
+	-->
+	<PropertyGroup>
+		<TestTargetFrameworks>net10.0</TestTargetFrameworks>
+	</PropertyGroup>
+</Project>
